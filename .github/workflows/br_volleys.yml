@@ -2,7 +2,7 @@ name: Build BR Volleys ICS
 
 on:
   schedule:
-    - cron: "17 5 * * *"
+    - cron: "17 5 * * *"   # täglich 05:17 UTC (~06:17 Berlin Winterzeit)
   workflow_dispatch: {}
 
 permissions:
@@ -28,11 +28,11 @@ jobs:
       - name: Build ICS
         run: python br_volleys_to_ics.py
 
-      # Packe die Seite (inkl. ICS) als Pages-Artifact
+      # Paket für Pages hochladen (enthält br_volleys_merged.ics)
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .   # enthält br_volleys_merged.ics
+          path: .
 
   deploy:
     needs: build
