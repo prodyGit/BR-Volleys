@@ -1,13 +1,14 @@
-
 name: Build BR Volleys ICS
-
-permissions:
-  contents: write   # <— Wichtig: erlaubt Push auf gh-pages
 
 on:
   schedule:
     - cron: "17 5 * * *"
   workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -27,13 +28,19 @@ jobs:
       - name: Build ICS
         run: python br_volleys_to_ics.py
 
-      - name: Deploy to Pages
-        uses: peaceiris/actions-gh-pages@v3
+      # Packe die Seite (inkl. ICS) als Pages-Artifact
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: .
-          enable_jekyll: false
-          keep_files: true
-          user_name: github-actions[bot]
-          user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          path: .   # enthält br_volleys_merged.ics
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
