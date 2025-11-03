@@ -1,34 +1,39 @@
+
 name: Build BR Volleys ICS
+
+permissions:
+  contents: write   # <— Wichtig: erlaubt Push auf gh-pages
+
 on:
   schedule:
-    - cron: "17 5 * * *"   # daily at 05:17 UTC
+    - cron: "17 5 * * *"
   workflow_dispatch: {}
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install deps
         run: pip install requests beautifulsoup4
+
       - name: Build ICS
-        run: |
-          python br_volleys_to_ics.py
-      - name: Publish artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: br_volleys_merged
-          path: br_volleys_merged.ics
+        run: python br_volleys_to_ics.py
+
       - name: Deploy to Pages
-        if: ${{ github.ref == 'refs/heads/main' }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
           publish_branch: gh-pages
+          publish_dir: .
           enable_jekyll: false
           keep_files: true
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
