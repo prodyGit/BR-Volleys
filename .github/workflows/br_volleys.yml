@@ -2,7 +2,7 @@ name: Build BR Volleys ICS
 
 on:
   schedule:
-    - cron: "17 5 * * *"   # täglich 05:17 UTC (~06:17 Berlin Winterzeit)
+    - cron: "17 5 * * *"   # täglich 05:17 UTC
   workflow_dispatch: {}
 
 permissions:
@@ -28,11 +28,23 @@ jobs:
       - name: Build ICS
         run: python br_volleys_to_ics.py
 
-      # Paket für Pages hochladen (enthält br_volleys_merged.ics)
+      - name: Verify output
+        run: |
+          ls -la
+          test -f br_volleys_merged.ics || (echo "ICS fehlt!" && exit 1)
+
+      - name: Prepare public folder
+        run: |
+          mkdir -p public
+          mv -f br_volleys_merged.ics public/
+          # Optional: eine minimale Index-Seite
+          printf '%s\n' '<!doctype html><title>BRV ICS</title><p>OK</p>' > public/index.html
+          ls -la public
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: public
 
   deploy:
     needs: build
